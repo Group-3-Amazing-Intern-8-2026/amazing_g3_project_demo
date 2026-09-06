@@ -173,6 +173,7 @@ GameObject:
   m_Component:
   - component: {fileID: 419131219}
   - component: {fileID: 419131217}
+  - component: {fileID: 419131220}
   m_Layer: 0
   m_Name: PlayerSnake
   m_TagString: Player
@@ -201,8 +202,7 @@ MonoBehaviour:
     m_Bits: 64
   distanceBetweenSegments: 1
   initialBodyCount: 1
-  bodySegmentPrefab: {fileID: 2777313030569559386, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
-  bodySegmentParent: {fileID: 1622753891}
+  bodySegmentPool: {fileID: 419131220}
   positionHistory: []
   isBoosting: 0
 --- !u!4 &419131219
@@ -222,6 +222,22 @@ Transform:
   - {fileID: 1622753891}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &419131220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419131216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b96d93b49c99995fe911c6e11b9eca5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BodySegmentPool
+  prefab: {fileID: 8959322725768008699, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
+  initialCapacity: 10
+  maxSize: 50
+  bodySegmentParent: {fileID: 1622753891}
 --- !u!1 &462421080
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,7 +632,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c84bbbbdc97ca1c8aab28a93d5a2c4f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FoodSpawner
-  foodPrefab: {fileID: 8609885804716853409, guid: 1d61ab19939b36feeaf92533818f9051, type: 3}
+  prefab: {fileID: 7437206336150396952, guid: 1d61ab19939b36feeaf92533818f9051, type: 3}
+  initialCapacity: 10
+  maxSize: 50
   initialFoodCount: 150
   arenaSize: 40
 --- !u!4 &1442687807

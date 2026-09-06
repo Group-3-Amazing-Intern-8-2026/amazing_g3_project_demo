@@ -15,8 +15,7 @@ public class SnakeHead : MonoBehaviour
     [Header("Body & Tail Tracking")]
     [SerializeField] private float distanceBetweenSegments = 0.5f;
     [SerializeField] private int initialBodyCount = 5;
-    [SerializeField] private GameObject bodySegmentPrefab;
-    [SerializeField] private Transform bodySegmentParent;
+    [SerializeField] private BodySegmentPool bodySegmentPool;
 
     [HideInInspector]
     public List<Vector2> positionHistory = new List<Vector2>();
@@ -30,6 +29,11 @@ public class SnakeHead : MonoBehaviour
     {
         mainCamera = Camera.main;
         positionHistory.Add(transform.position);
+
+        if (bodySegmentPool == null)
+        {
+            bodySegmentPool = FindFirstObjectByType<BodySegmentPool>();
+        }
 
         // Instantiate initial body segments
         for (int i = 0; i < initialBodyCount; i++)
@@ -128,25 +132,28 @@ public class SnakeHead : MonoBehaviour
 
     public void Grow()
     {
+        if (bodySegmentPool == null) return;
+
         Vector2 spawnPos = positionHistory.Count > 0 ? positionHistory[positionHistory.Count - 1] : (Vector2)transform.position;
-        GameObject segment = null;
-
-        Transform targetParent = bodySegmentParent != null ? bodySegmentParent : transform;
-
-        if (bodySegmentPrefab != null)
-        {
-            segment = Instantiate(bodySegmentPrefab, spawnPos, Quaternion.identity, targetParent);
-        }
-        else
-        {
-            segment = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            segment.transform.position = spawnPos;
-            segment.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
-            segment.transform.SetParent(targetParent);
-            Destroy(segment.GetComponent<Collider>());
-        }
-
+        BodySegment segment = bodySegmentPool.Get();
+        segment.transform.position = spawnPos;
         bodySegments.Add(segment.transform);
+    }
+
+    public void Shrink()
+    {
+        if (bodySegmentPool == null) return;
+
+        if (bodySegments.Count > 0)
+        {
+            Transform segmentTransform = bodySegments[bodySegments.Count - 1];
+            bodySegments.RemoveAt(bodySegments.Count - 1);
+            BodySegment segment = segmentTransform.GetComponent<BodySegment>();
+            if (segment != null)
+            {
+                bodySegmentPool.Release(segment);
+            }
+        }
     }
 
     // Visual helper: Draws the eat radius as a green circle in the Unity Scene View

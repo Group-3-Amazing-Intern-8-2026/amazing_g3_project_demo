@@ -1,17 +1,13 @@
-using System.Collections.Generic;
 using UnityEngine;
 
-public class FoodSpawner : MonoBehaviour
+public class FoodSpawner : ObjectPoolBase<Food>
 {
     public static FoodSpawner Instance;
 
-    [SerializeField] private GameObject foodPrefab;
     [SerializeField] private int initialFoodCount = 100;
     [SerializeField] private float arenaSize = 30f;
 
-    private List<GameObject> foodPool = new List<GameObject>();
-
-    void Awake()
+    protected override void Awake()
     {
         if (Instance == null)
         {
@@ -20,7 +16,12 @@ public class FoodSpawner : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
         }
+
+        initialCapacity = initialFoodCount;
+        maxSize = 200;
+        base.Awake();
     }
 
     void Start()
@@ -31,42 +32,48 @@ public class FoodSpawner : MonoBehaviour
         }
     }
 
-    void SpawnFoodAtRandomPosition()
+    protected override Food CreateItem()
     {
-        Vector2 randomPos = new Vector2(
-            Random.Range(-arenaSize, arenaSize),
-            Random.Range(-arenaSize, arenaSize)
-        );
-
-        GameObject food;
-        if (foodPrefab != null)
+        Food food;
+        if (prefab != null)
         {
-            // Spawn directly as child of this FoodSpawner
-            food = Instantiate(foodPrefab, randomPos, Quaternion.identity, transform);
+            food = Instantiate(prefab, transform);
         }
         else
         {
-            food = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            food.transform.position = randomPos;
-            food.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-            
-            // Set parent to this FoodSpawner
-            food.transform.SetParent(transform);
+            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            sphere.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            sphere.transform.SetParent(transform);
 
-            Collider col = food.GetComponent<Collider>();
+            Collider col = sphere.GetComponent<Collider>();
             if (col != null) col.isTrigger = true;
-            food.AddComponent<Food>();
+            food = sphere.AddComponent<Food>();
         }
-
-        foodPool.Add(food);
+        return food;
     }
 
-    public void RespawnFood(GameObject food)
+    protected override void OnGetItem(Food food)
     {
+        base.OnGetItem(food);
         Vector2 randomPos = new Vector2(
             Random.Range(-arenaSize, arenaSize),
             Random.Range(-arenaSize, arenaSize)
         );
         food.transform.position = randomPos;
+    }
+
+    void SpawnFoodAtRandomPosition()
+    {
+        Get();
+    }
+
+    public void RespawnFood(GameObject foodObj)
+    {
+        Food food = foodObj.GetComponent<Food>();
+        if (food != null)
+        {
+            Release(food);
+            Get();
+        }
     }
 }

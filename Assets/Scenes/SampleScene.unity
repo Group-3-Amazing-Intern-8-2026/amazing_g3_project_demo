@@ -172,8 +172,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 419131219}
+  - component: {fileID: 419131223}
   - component: {fileID: 419131217}
-  - component: {fileID: 419131220}
+  - component: {fileID: 419131222}
+  - component: {fileID: 419131224}
   m_Layer: 0
   m_Name: PlayerSnake
   m_TagString: Player
@@ -190,19 +192,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 419131216}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce4e5592d70e923798064ab022db4f54, type: 3}
+  m_Script: {fileID: 11500000, guid: 8b5d3c91e2f44a1b9f7c123456789abc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SnakeHead
+  m_EditorClassIdentifier: Assembly-CSharp::SnakeMovement
   moveSpeed: 6
   boostSpeed: 12
   rotationSpeed: 600
-  eatRadius: 0.6
-  foodLayer:
-    serializedVersion: 2
-    m_Bits: 64
   distanceBetweenSegments: 1
-  initialBodyCount: 1
-  bodySegmentPool: {fileID: 419131220}
   positionHistory: []
   isBoosting: 0
 --- !u!4 &419131219
@@ -222,7 +218,7 @@ Transform:
   - {fileID: 1622753891}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &419131220
+--- !u!114 &419131222
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -231,13 +227,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 419131216}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b96d93b49c99995fe911c6e11b9eca5b, type: 3}
+  m_Script: {fileID: 11500000, guid: f44a1b9f8b5d3c91321fedcba9876543, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BodySegmentPool
-  prefab: {fileID: 8959322725768008699, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
-  initialCapacity: 10
-  maxSize: 50
-  bodySegmentParent: {fileID: 1622753891}
+  m_EditorClassIdentifier: Assembly-CSharp::SnakeEater
+  eatRadius: 0.6
+  foodLayer:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &419131223
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419131216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b9f8b5d3c91e2f4fedcba9876543210, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SnakeManager
+--- !u!114 &419131224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419131216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c91e2f48b5d4a1bf7c987654321fedc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SnakeBodyManager
+  initialBodyCount: 5
+  bodySegmentPool: {fileID: 1622753895}
+  followSmoothing: 25
 --- !u!1 &462421080
 GameObject:
   m_ObjectHideFlags: 0
@@ -250,7 +273,7 @@ GameObject:
   - component: {fileID: 462421083}
   - component: {fileID: 462421082}
   m_Layer: 0
-  m_Name: Circle
+  m_Name: Visual Head
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -661,6 +684,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1622753891}
+  - component: {fileID: 1622753894}
+  - component: {fileID: 1622753895}
   m_Layer: 0
   m_Name: Body
   m_TagString: Player
@@ -683,6 +708,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 419131219}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1622753894
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1622753890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c91e2f48b5d4a1bf7c987654321fedc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SnakeBodyManager
+  initialBodyCount: 1
+  bodySegmentPool: {fileID: 1622753895}
+  followSmoothing: 25
+--- !u!114 &1622753895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1622753890}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b96d93b49c99995fe911c6e11b9eca5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BodySegmentPool
+  prefab: {fileID: 8959322725768008699, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
+  initialCapacity: 10
+  maxSize: 50
+  bodySegmentParent: {fileID: 1622753891}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -173,9 +173,6 @@ GameObject:
   m_Component:
   - component: {fileID: 419131219}
   - component: {fileID: 419131223}
-  - component: {fileID: 419131217}
-  - component: {fileID: 419131222}
-  - component: {fileID: 419131224}
   m_Layer: 0
   m_Name: PlayerSnake
   m_TagString: Player
@@ -183,24 +180,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &419131217
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 419131216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8b5d3c91e2f44a1b9f7c123456789abc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SnakeMovement
-  moveSpeed: 6
-  boostSpeed: 12
-  rotationSpeed: 600
-  distanceBetweenSegments: 1
-  positionHistory: []
-  isBoosting: 0
 --- !u!4 &419131219
 Transform:
   m_ObjectHideFlags: 0
@@ -218,22 +197,6 @@ Transform:
   - {fileID: 1622753891}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &419131222
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 419131216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f44a1b9f8b5d3c91321fedcba9876543, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SnakeEater
-  eatRadius: 0.6
-  foodLayer:
-    serializedVersion: 2
-    m_Bits: 64
 --- !u!114 &419131223
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -246,21 +209,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b9f8b5d3c91e2f4fedcba9876543210, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SnakeManager
---- !u!114 &419131224
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 419131216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c91e2f48b5d4a1bf7c987654321fedc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SnakeBodyManager
-  initialBodyCount: 5
-  bodySegmentPool: {fileID: 1622753895}
-  followSmoothing: 25
+  movement: {fileID: 462421085}
+  bodyManager: {fileID: 1622753894}
+  eater: {fileID: 462421084}
 --- !u!1 &462421080
 GameObject:
   m_ObjectHideFlags: 0
@@ -272,8 +223,10 @@ GameObject:
   - component: {fileID: 462421081}
   - component: {fileID: 462421083}
   - component: {fileID: 462421082}
+  - component: {fileID: 462421085}
+  - component: {fileID: 462421084}
   m_Layer: 0
-  m_Name: Visual Head
+  m_Name: Head
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -389,6 +342,40 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &462421084
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462421080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f44a1b9f8b5d3c91321fedcba9876543, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SnakeEater
+  eatRadius: 0.6
+  foodLayer:
+    serializedVersion: 2
+    m_Bits: 64
+--- !u!114 &462421085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462421080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b5d3c91e2f44a1b9f7c123456789abc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SnakeMovement
+  moveSpeed: 5
+  boostSpeed: 10
+  rotationSpeed: 500
+  pointSpacing: 0.2
+  maxPathPoints: 2000
+  isBoosting: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -539,9 +526,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ee863816f8850761974e263dcef5aab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
-  target: {fileID: 419131219}
-  smoothSpeed: 5
+  target: {fileID: 462421081}
   offset: {x: 0, y: 0, z: -10}
+  smoothTime: 0.15
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -720,9 +707,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c91e2f48b5d4a1bf7c987654321fedc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SnakeBodyManager
+  bodyContainer: {fileID: 1622753891}
+  snakeMovement: {fileID: 462421085}
+  spacingBetweenSegments: 0.8
   initialBodyCount: 1
   bodySegmentPool: {fileID: 1622753895}
-  followSmoothing: 25
 --- !u!114 &1622753895
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -736,8 +725,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BodySegmentPool
   prefab: {fileID: 8959322725768008699, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
-  initialCapacity: 10
-  maxSize: 50
+  initialCapacity: 100
+  maxSize: 300
   bodySegmentParent: {fileID: 1622753891}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

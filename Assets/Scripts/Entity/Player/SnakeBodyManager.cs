@@ -3,104 +3,72 @@ using UnityEngine;
 
 public class SnakeBodyManager : MonoBehaviour
 {
+    [Header("Hierarchy Setup")]
+    [SerializeField] private Transform bodyContainer;
+    [SerializeField] private SnakeMovement snakeMovement;
+
     [Header("Body Settings")]
+    [SerializeField] private float spacingBetweenSegments = 0.3f;
     [SerializeField] private int initialBodyCount = 5;
     [SerializeField] private BodySegmentPool bodySegmentPool;
-    [SerializeField] private float followSmoothing = 25f;
 
-    private SnakeMovement snakeMovement;
     private List<Transform> bodySegments = new List<Transform>();
 
     public int SegmentCount => bodySegments.Count;
 
     void Start()
     {
-        snakeMovement = GetComponentInParent<SnakeMovement>();
-
-        if (bodySegmentPool == null)
-        {
-            bodySegmentPool = GetComponent<BodySegmentPool>();
-            if (bodySegmentPool == null)
-            {
-                bodySegmentPool = FindFirstObjectByType<BodySegmentPool>();
-            }
-        }
 
         for (int i = 0; i < initialBodyCount; i++)
         {
             Grow();
         }
     }
-
-    void FixedUpdate()
+    void LateUpdate()
     {
-        UpdateBodySegments();
+        UpdateBodyPositionsAndRotations();
     }
 
-    void UpdateBodySegments()
+    void UpdateBodyPositionsAndRotations()
     {
-        if (snakeMovement == null || snakeMovement.positionHistory.Count == 0) return;
-
-        snakeMovement.UpdateSegmentCount(bodySegments.Count);
-
-        int historyIndex = 0;
-        float accumulatedDistance = 0f;
-
         for (int i = 0; i < bodySegments.Count; i++)
         {
-            float requiredDistance = snakeMovement.DistanceBetweenSegments * (i + 1);
+            float lagDistance = (i + 1) * spacingBetweenSegments;
+            Vector2 segmentPos = snakeMovement.GetPointAtDistance(lagDistance);
+            bodySegments[i].position = new Vector3(segmentPos.x, segmentPos.y, 0f);
 
-            while (historyIndex < snakeMovement.positionHistory.Count - 1)
-            {
-                float dist = Vector2.Distance(snakeMovement.positionHistory[historyIndex], snakeMovement.positionHistory[historyIndex + 1]);
-                if (accumulatedDistance + dist >= requiredDistance)
-                {
-                    break;
-                }
-                accumulatedDistance += dist;
-                historyIndex++;
-            }
+            Vector2 targetLookPos = (i == 0) ? (Vector2)snakeMovement.transform.position : (Vector2)bodySegments[i - 1].position;
+            Vector2 lookDir = targetLookPos - segmentPos;
 
-            Vector2 targetPos = bodySegments[i].position;
-            if (historyIndex < snakeMovement.positionHistory.Count - 1)
+            if (lookDir.sqrMagnitude > 0.0001f)
             {
-                float dist = Vector2.Distance(snakeMovement.positionHistory[historyIndex], snakeMovement.positionHistory[historyIndex + 1]);
-                float leftover = requiredDistance - accumulatedDistance;
-                targetPos = Vector2.Lerp(snakeMovement.positionHistory[historyIndex], snakeMovement.positionHistory[historyIndex + 1], dist > 0f ? leftover / dist : 0f);
+                float angle = Mathf.Atan2(lookDir.y, lookDir.x) * Mathf.Rad2Deg - 90f;
+                bodySegments[i].rotation = Quaternion.Euler(0f, 0f, angle);
             }
-            else if (snakeMovement.positionHistory.Count > 0)
-            {
-                targetPos = snakeMovement.positionHistory[snakeMovement.positionHistory.Count - 1];
-            }
-
-            bodySegments[i].position = Vector2.Lerp(bodySegments[i].position, targetPos, followSmoothing * Time.fixedDeltaTime);
         }
     }
 
     public void Grow()
     {
-        if (bodySegmentPool == null) return;
-
-        List<Vector2> history = snakeMovement != null ? snakeMovement.positionHistory : null;
-        Vector2 spawnPos = (history != null && history.Count > 0) ? history[history.Count - 1] : (Vector2)transform.position;
         BodySegment segment = bodySegmentPool.Get();
-        segment.transform.position = spawnPos;
+        segment.transform.SetParent(bodyContainer ?? transform);
+
+        float lagDistance = (bodySegments.Count + 1) * spacingBetweenSegments;
+        Vector2 spawnPos = snakeMovement.GetPointAtDistance(lagDistance);
+        segment.transform.position = new Vector3(spawnPos.x, spawnPos.y, 0f);
         bodySegments.Add(segment.transform);
     }
 
     public void Shrink()
     {
-        if (bodySegmentPool == null) return;
+        if (bodySegments.Count == 0) return;
 
-        if (bodySegments.Count > 0)
+        int lastIndex = bodySegments.Count - 1;
+        BodySegment segment = bodySegments[lastIndex].GetComponent<BodySegment>();
+        bodySegments.RemoveAt(lastIndex);
+        if (segment != null)
         {
-            Transform segmentTransform = bodySegments[bodySegments.Count - 1];
-            bodySegments.RemoveAt(bodySegments.Count - 1);
-            BodySegment segment = segmentTransform.GetComponent<BodySegment>();
-            if (segment != null)
-            {
-                bodySegmentPool.Release(segment);
-            }
+            bodySegmentPool.Release(segment);
         }
     }
 }

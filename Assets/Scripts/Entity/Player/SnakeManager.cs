@@ -1,23 +1,34 @@
 using UnityEngine;
 
-[RequireComponent(typeof(SnakeMovement))]
-[RequireComponent(typeof(SnakeBodyManager))]
-[RequireComponent(typeof(SnakeEater))]
 public class SnakeManager : MonoBehaviour
 {
-    private SnakeMovement movement;
-    private SnakeBodyManager bodyManager;
-    private SnakeEater eater;
+    [SerializeField] private SnakeMovement movement;
+    [SerializeField] private SnakeBodyManager bodyManager;
+    [SerializeField] private SnakeEater eater;
 
     public SnakeMovement Movement => movement;
     public SnakeBodyManager BodyManager => bodyManager;
     public SnakeEater Eater => eater;
 
-    void Awake()
+    void OnEnable()
     {
-        movement = GetComponent<SnakeMovement>();
-        bodyManager = GetComponent<SnakeBodyManager>();
-        eater = GetComponent<SnakeEater>();
+        if (eater != null)
+        {
+            eater.OnFoodEaten += HandleFoodEaten;
+        }
+    }
+
+    void OnDisable()
+    {
+        if (eater != null)
+        {
+            eater.OnFoodEaten -= HandleFoodEaten;
+        }
+    }
+
+    private void HandleFoodEaten(Food food)
+    {
+        Grow();
     }
 
     public void Grow()

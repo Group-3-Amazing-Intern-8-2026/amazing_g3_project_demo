@@ -1,18 +1,12 @@
+using System;
 using UnityEngine;
 
-[RequireComponent(typeof(SnakeBodyManager))]
 public class SnakeEater : MonoBehaviour
 {
-    [Header("Eating Settings")]
     [SerializeField] private float eatRadius = 0.6f;
     [SerializeField] private LayerMask foodLayer;
 
-    private SnakeBodyManager bodyManager;
-
-    void Start()
-    {
-        bodyManager = GetComponent<SnakeBodyManager>();
-    }
+    public event Action<Food> OnFoodEaten;
 
     void Update()
     {
@@ -28,8 +22,8 @@ public class SnakeEater : MonoBehaviour
             Food food = hitFoods[i].GetComponent<Food>();
             if (food != null)
             {
-                bodyManager.Grow();
                 food.OnEaten();
+                OnFoodEaten?.Invoke(food);
             }
         }
     }

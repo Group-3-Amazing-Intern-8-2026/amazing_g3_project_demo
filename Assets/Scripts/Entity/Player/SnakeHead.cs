@@ -4,14 +4,19 @@ using UnityEngine;
 public class SnakeHead : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveSpeed = 5f;
-    public float boostSpeed = 10f;
-    public float rotationSpeed = 200f;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float boostSpeed = 10f;
+    [SerializeField] private float rotationSpeed = 200f;
+
+    [Header("Eating Settings")]
+    [SerializeField] private float eatRadius = 0.6f;
+    [SerializeField] private LayerMask foodLayer;
 
     [Header("Body & Tail Tracking")]
-    public float distanceBetweenSegments = 0.5f;
-    public int initialBodyCount = 5;
-    public GameObject bodySegmentPrefab;
+    [SerializeField] private float distanceBetweenSegments = 0.5f;
+    [SerializeField] private int initialBodyCount = 5;
+    [SerializeField] private GameObject bodySegmentPrefab;
+    [SerializeField] private Transform bodySegmentParent;
 
     [HideInInspector]
     public List<Vector2> positionHistory = new List<Vector2>();
@@ -38,6 +43,7 @@ public class SnakeHead : MonoBehaviour
         HandleInput();
         MoveHead();
         UpdateBodySegments();
+        CheckFoodOverlap();
     }
 
     void HandleInput()
@@ -54,7 +60,6 @@ public class SnakeHead : MonoBehaviour
 
     void MoveHead()
     {
-        // Rotate towards pointer position from InputController
         Vector2 screenPos = InputController.Instance != null ? InputController.Instance.PointerPosition : (Vector2)Input.mousePosition;
         Vector3 mousePos = mainCamera.ScreenToWorldPoint(screenPos);
         mousePos.z = 0f;
@@ -67,20 +72,32 @@ public class SnakeHead : MonoBehaviour
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
-        // Move forward
         float currentSpeed = isBoosting ? boostSpeed : moveSpeed;
         transform.Translate(Vector3.up * currentSpeed * Time.deltaTime);
 
-        // Record position history for body following
         if (positionHistory.Count == 0 || Vector2.Distance(transform.position, positionHistory[0]) > 0.1f)
         {
             positionHistory.Insert(0, transform.position);
 
-            // Limit history size to prevent memory growth
             int maxHistory = (bodySegments.Count + 1) * Mathf.CeilToInt(distanceBetweenSegments / 0.1f) + 50;
             if (positionHistory.Count > maxHistory)
             {
                 positionHistory.RemoveAt(positionHistory.Count - 1);
+            }
+        }
+    }
+
+    void CheckFoodOverlap()
+    {
+        Collider2D[] hitFoods = Physics2D.OverlapCircleAll(transform.position, eatRadius, foodLayer);
+
+        for (int i = 0; i < hitFoods.Length; i++)
+        {
+            Food food = hitFoods[i].GetComponent<Food>();
+            if (food != null)
+            {
+                Grow();
+                food.OnEaten();
             }
         }
     }
@@ -93,7 +110,6 @@ public class SnakeHead : MonoBehaviour
             float requiredDistance = distanceBetweenSegments * (i + 1);
             float accumulatedDistance = 0f;
 
-            // Find the point in history that matches the required distance
             for (int j = 0; j < positionHistory.Count - 1; j++)
             {
                 float dist = Vector2.Distance(positionHistory[j], positionHistory[j + 1]);
@@ -115,19 +131,28 @@ public class SnakeHead : MonoBehaviour
         Vector2 spawnPos = positionHistory.Count > 0 ? positionHistory[positionHistory.Count - 1] : (Vector2)transform.position;
         GameObject segment = null;
 
+        Transform targetParent = bodySegmentParent != null ? bodySegmentParent : transform;
+
         if (bodySegmentPrefab != null)
         {
-            segment = Instantiate(bodySegmentPrefab, spawnPos, Quaternion.identity);
+            segment = Instantiate(bodySegmentPrefab, spawnPos, Quaternion.identity, targetParent);
         }
         else
         {
-            // Create a simple default circle if prefab is not assigned
             segment = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             segment.transform.position = spawnPos;
             segment.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
+            segment.transform.SetParent(targetParent);
             Destroy(segment.GetComponent<Collider>());
         }
 
         bodySegments.Add(segment.transform);
+    }
+
+    // Visual helper: Draws the eat radius as a green circle in the Unity Scene View
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, eatRadius);
     }
 }

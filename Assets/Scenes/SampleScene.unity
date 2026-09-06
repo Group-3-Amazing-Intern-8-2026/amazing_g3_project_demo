@@ -175,7 +175,7 @@ GameObject:
   - component: {fileID: 419131217}
   m_Layer: 0
   m_Name: PlayerSnake
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -194,10 +194,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SnakeHead
   moveSpeed: 6
   boostSpeed: 12
-  rotationSpeed: 250
-  distanceBetweenSegments: 0.4
-  initialBodyCount: 8
+  rotationSpeed: 600
+  eatRadius: 0.6
+  foodLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  distanceBetweenSegments: 1
+  initialBodyCount: 1
   bodySegmentPrefab: {fileID: 2777313030569559386, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
+  bodySegmentParent: {fileID: 1622753891}
   positionHistory: []
   isBoosting: 0
 --- !u!4 &419131219
@@ -214,6 +219,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 462421081}
+  - {fileID: 1622753891}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &462421080
@@ -229,7 +235,7 @@ GameObject:
   - component: {fileID: 462421082}
   m_Layer: 0
   m_Name: Circle
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -627,6 +633,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1622753890
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1622753891}
+  m_Layer: 0
+  m_Name: Body
+  m_TagString: Player
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1622753891
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1622753890}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 419131219}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

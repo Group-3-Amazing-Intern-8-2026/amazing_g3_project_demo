@@ -5,9 +5,9 @@ public class FoodSpawner : MonoBehaviour
 {
     public static FoodSpawner Instance;
 
-    public GameObject foodPrefab;
-    public int initialFoodCount = 100;
-    public float arenaSize = 30f;
+    [SerializeField] private GameObject foodPrefab;
+    [SerializeField] private int initialFoodCount = 100;
+    [SerializeField] private float arenaSize = 30f;
 
     private List<GameObject> foodPool = new List<GameObject>();
 
@@ -41,13 +41,18 @@ public class FoodSpawner : MonoBehaviour
         GameObject food;
         if (foodPrefab != null)
         {
-            food = Instantiate(foodPrefab, randomPos, Quaternion.identity);
+            // Spawn directly as child of this FoodSpawner
+            food = Instantiate(foodPrefab, randomPos, Quaternion.identity, transform);
         }
         else
         {
             food = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             food.transform.position = randomPos;
             food.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+            
+            // Set parent to this FoodSpawner
+            food.transform.SetParent(transform);
+
             Collider col = food.GetComponent<Collider>();
             if (col != null) col.isTrigger = true;
             food.AddComponent<Food>();

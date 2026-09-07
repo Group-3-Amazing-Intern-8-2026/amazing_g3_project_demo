@@ -370,9 +370,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b5d3c91e2f44a1b9f7c123456789abc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SnakeMovement
-  moveSpeed: 5
+  moveSpeed: 6
   boostSpeed: 10
-  rotationSpeed: 500
+  rotationSpeed: 600
   pointSpacing: 0.2
   maxPathPoints: 2000
   isBoosting: 0
@@ -724,7 +724,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b96d93b49c99995fe911c6e11b9eca5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BodySegmentPool
-  prefab: {fileID: 8959322725768008699, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
+  prefab: {fileID: 6955439477299479859, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
   initialCapacity: 100
   maxSize: 300
   bodySegmentParent: {fileID: 1622753891}

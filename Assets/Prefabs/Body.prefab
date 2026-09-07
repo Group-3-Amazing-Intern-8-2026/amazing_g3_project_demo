@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2386367850736949909}
   - component: {fileID: 6851911430423231689}
-  - component: {fileID: 8959322725768008699}
   - component: {fileID: 3867274601996662137}
+  - component: {fileID: 6955439477299479859}
   m_Layer: 0
   m_Name: Body
   m_TagString: Player
@@ -93,18 +93,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &8959322725768008699
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2777313030569559386}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e4a751b3d603d975ca8eb5432b00e6bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BodySegment
 --- !u!61 &3867274601996662137
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -151,3 +139,18 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &6955439477299479859
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2777313030569559386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e0e2a8122cf7f143b85f4664393bc1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BodySegment
+  segmentIndex: 0
+  maxHealth: 100
+  currentHealth: 0

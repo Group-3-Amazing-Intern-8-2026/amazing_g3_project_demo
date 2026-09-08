@@ -173,6 +173,7 @@ GameObject:
   m_Component:
   - component: {fileID: 419131219}
   - component: {fileID: 419131223}
+  - component: {fileID: 419131224}
   m_Layer: 0
   m_Name: PlayerSnake
   m_TagString: Player
@@ -212,6 +213,20 @@ MonoBehaviour:
   movement: {fileID: 462421085}
   bodyManager: {fileID: 1622753894}
   eater: {fileID: 462421084}
+--- !u!114 &419131224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 419131216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bc8cbf5e88f49e4ebe2507e0723ad5d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerPointSystem
+  totalPoints: 0
+  segmentProgress: 0
 --- !u!1 &462421080
 GameObject:
   m_ObjectHideFlags: 0
@@ -647,6 +662,14 @@ MonoBehaviour:
   maxSize: 50
   initialFoodCount: 150
   arenaSize: 40
+  foodDataOptions:
+  - {fileID: 11400000, guid: 757f7a1357d71e44590346606763d494, type: 2}
+  - {fileID: 11400000, guid: b096956fda4a4aa48996e7ef9502f76b, type: 2}
+  - {fileID: 11400000, guid: 897d8f18173ae3c42a26234325ed69f2, type: 2}
+  spawnWeights:
+  - 60
+  - 30
+  - 10
 --- !u!4 &1442687807
 Transform:
   m_ObjectHideFlags: 0

@@ -725,8 +725,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BodySegmentPool
   prefab: {fileID: 6955439477299479859, guid: 82ac5fc2983136f6a9c1cb9f1bbfdbaa, type: 3}
-  initialCapacity: 100
-  maxSize: 300
+  initialCapacity: 200
+  maxSize: 400
   bodySegmentParent: {fileID: 1622753891}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:

@@ -138,7 +138,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""c0d5f5d3-cg2e-6e92-b1dd-ff57d59494g9"",
+                    ""id"": ""c0d5f5d3-c92e-4e92-b1dd-ff57d59494f9"",
                     ""path"": ""<Gamepad>/leftStick"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -149,7 +149,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""d1e6g6e4-dh3f-7f03-c2ee-0068e60505h0"",
+                    ""id"": ""d1e6a6e4-db3f-4f03-c2ee-0068e60505a0"",
                     ""path"": ""<Mouse>/leftButton"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -160,7 +160,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e2f7h7f5-ei4g-8g14-d3ff-1179f71616i1"",
+                    ""id"": ""e2f7b7f5-e14c-4a14-d3ff-1179f71616b1"",
                     ""path"": ""<Keyboard>/space"",
                     ""interactions"": """",
                     ""processors"": """",
@@ -171,7 +171,7 @@ public partial class @PlayerInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""f3g8i8g6-fj5h-9h25-e4gg-2280g82727j2"",
+                    ""id"": ""f3a8b8c6-f25d-4a25-e4ef-2280a82727c2"",
                     ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
                     ""processors"": """",

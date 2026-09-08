@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class SnakeManager : MonoBehaviour
 {
+    public static SnakeManager Instance { get; private set; }
+    
     [SerializeField] private SnakeMovement movement;
     [SerializeField] private SnakeBodyManager bodyManager;
     [SerializeField] private SnakeEater eater;
@@ -9,6 +11,20 @@ public class SnakeManager : MonoBehaviour
     public SnakeMovement Movement => movement;
     public SnakeBodyManager BodyManager => bodyManager;
     public SnakeEater Eater => eater;
+
+    
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Debug.LogWarning("[SnakeManager] Đã có 1 Instance tồn tại, huỷ bản sao thừa.");
+            Destroy(gameObject);
+        }
+    }
 
     void OnEnable()
     {
@@ -26,9 +42,13 @@ public class SnakeManager : MonoBehaviour
         }
     }
 
+    /// LƯU Ý: Không gọi Grow() ở đây. PlayerPointSystem.AddFood() đã tự quyết định, khi nào Grow() dựa trên % tiến 
+    /// trình đạt 100% (có carry-over phần dư).
+    /// Nếu gọi Grow() ở cả đây lẫn PlayerPointSystem, rắn sẽ dài ra 2 lần cho 1 lần ăn.
+    /// Giữ sự kiện này để gắn SFX/VFX "ăn" nếu cần sau này.
     private void HandleFoodEaten(Food food)
     {
-        Grow();
+        
     }
 
     public void Grow()

@@ -1,5 +1,6 @@
 using UnityEngine;
 using Core.Interfaces;
+using Core.Enums;
 
 public class BodySegment : MonoBehaviour, IDamageable
 {
@@ -13,6 +14,9 @@ public class BodySegment : MonoBehaviour, IDamageable
 
     public delegate void SegmentDeathHandler(BodySegment segment);
     public event SegmentDeathHandler OnSegmentDeath;
+    [Header("Segment Identity")]
+    [Tooltip("Chọn loại bộ phận này trong Inspector")]
+    public SegmentPart partType;
 
     public void Initialize(int index, float health)
     {
@@ -42,4 +46,5 @@ public class BodySegment : MonoBehaviour, IDamageable
     {
         OnSegmentDeath?.Invoke(this);
     }
+    
 }

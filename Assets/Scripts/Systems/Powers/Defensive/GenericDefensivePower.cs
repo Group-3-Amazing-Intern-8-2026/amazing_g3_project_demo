@@ -4,8 +4,10 @@ using Core.Enums;
 
 namespace Systems.Powers.Defensive
 {
-    public class GenericDefensivePower : MonoBehaviour, IDefensivePower
+    [CreateAssetMenu(fileName = "NewDefensivePower", menuName = "Powers/Create New Defensive Power")]
+    public class GenericDefensivePower : ScriptableObject, IDefensivePower
     {
+        
         public string skillName = "New Defensive Skill";
 
         [Tooltip("Chọn cách skill này tác động lên các bộ phận")]
@@ -67,4 +69,5 @@ namespace Systems.Powers.Defensive
             Debug.Log($"[{skillName}] Đã gỡ bỏ hiệu ứng khỏi: {segment.name}");
         }
     }
+    
 }

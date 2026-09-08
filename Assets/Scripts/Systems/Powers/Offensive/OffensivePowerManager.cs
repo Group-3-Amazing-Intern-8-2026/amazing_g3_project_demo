@@ -1,212 +1,301 @@
-using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
-public class OffensivePowerManager : MonoBehaviour
+namespace Systems.Powers.Offensive
 {
-    [System.Serializable]
-    public class LengthMilestone
+    public class OffensivePowerManager : MonoBehaviour
     {
-        [Min(0)]
-        public int requiredLength;
-
-        [Min(0)]
-        public int unlockedSlots;
-    }
-
-    [System.Serializable]
-    public class PowerSlot
-    {
-        [SerializeField] private bool isUnlocked;
-        [SerializeField] private bool isOccupied;
-
-        public bool IsUnlocked => isUnlocked;
-        public bool IsOccupied => isOccupied;
-        public bool IsAvailable => isUnlocked && !isOccupied;
-
-        public void Unlock()
+        [Serializable]
+        public class PowerSlot
         {
-            isUnlocked = true;
-        }
+            [SerializeField] private int slotIndex;
+            [SerializeField] private BodySegment assignedSegment;
+            [SerializeField] private bool isUnlocked;
+            [SerializeField] private bool isOccupied;
 
-        public void Lock()
-        {
-            isUnlocked = false;
-            isOccupied = false;
-        }
+            public int SlotIndex => slotIndex;
+            public BodySegment AssignedSegment => assignedSegment;
+            public bool IsUnlocked => isUnlocked;
+            public bool IsOccupied => isOccupied;
 
-        public bool TryOccupy()
-        {
-            if (!IsAvailable)
+            public PowerSlot(int index)
             {
-                return false;
+                slotIndex = index;
+                assignedSegment = null;
+                isUnlocked = false;
+                isOccupied = false;
             }
 
-            isOccupied = true;
+            public void Unlock()
+            {
+                isUnlocked = true;
+            }
+
+            public void AssignSegment(BodySegment segment)
+            {
+                assignedSegment = segment;
+            }
+
+            public void ClearSegment()
+            {
+                assignedSegment = null;
+                isOccupied = false;
+            }
+
+            public void SetOccupied(bool occupied)
+            {
+                isOccupied = occupied;
+            }
+        }
+
+        [Header("Milestone Settings")]
+        [Tooltip("Các mốc độ dài để mở khóa Power Slot.")]
+        [SerializeField]
+        private List<int> lengthMilestones = new List<int>();
+
+        [Header("Slot Configuration")]
+        [Tooltip("Số lượng Power Slot tối đa.")]
+        [SerializeField]
+        private int maxPerkSlots;
+
+        private int currentLength;
+        private int unlockedSlotsCount;
+
+        private readonly List<BodySegment> activeSegments =
+            new List<BodySegment>();
+
+        private readonly List<PowerSlot> powerSlots =
+            new List<PowerSlot>();
+
+        public event Action<int> OnSlotUnlocked;
+
+        public int CurrentLength => currentLength;
+        public int UnlockedSlotsCount => unlockedSlotsCount;
+        public IReadOnlyList<PowerSlot> PowerSlots => powerSlots;
+        public IReadOnlyList<BodySegment> ActiveSegments => activeSegments;
+
+        private void Start()
+        {
+            InitializeManager();
+        }
+
+        private void InitializeManager()
+        {
+            currentLength = 0;
+            unlockedSlotsCount = 0;
+
+            activeSegments.Clear();
+            powerSlots.Clear();
+
+            if (lengthMilestones == null)
+            {
+                lengthMilestones = new List<int>();
+            }
+
+            InitializeSlots();
+        }
+
+        private void InitializeSlots()
+        {
+            int slotCount = Mathf.Min(
+                maxPerkSlots,
+                lengthMilestones.Count
+            );
+
+            for (int i = 0; i < slotCount; i++)
+            {
+                powerSlots.Add(new PowerSlot(i));
+            }
+        }
+
+        public void RegisterNewSegment(BodySegment newSegment)
+        {
+            if (newSegment == null)
+                return;
+
+            if (activeSegments.Contains(newSegment))
+                return;
+
+            activeSegments.Add(newSegment);
+
+            UpdateLength(activeSegments.Count);
+
+            AssignSegmentToAvailableSlot(newSegment);
+        }
+
+        public void UnregisterSegment(BodySegment segment)
+        {
+            if (segment == null)
+                return;
+
+            if (!activeSegments.Contains(segment))
+                return;
+
+            PowerSlot slot = GetSlotBySegment(segment);
+
+            if (slot != null)
+            {
+                slot.ClearSegment();
+            }
+
+            activeSegments.Remove(segment);
+
+            UpdateLength(activeSegments.Count);
+        }
+
+        private void UpdateLength(int newLength)
+        {
+            currentLength = newLength;
+            CheckMilestones();
+        }
+
+        private void CheckMilestones()
+        {
+            if (lengthMilestones == null)
+                return;
+
+            while (
+                unlockedSlotsCount < lengthMilestones.Count &&
+                unlockedSlotsCount < maxPerkSlots &&
+                currentLength >= lengthMilestones[unlockedSlotsCount]
+            )
+            {
+                UnlockNextSlot();
+            }
+        }
+
+        private void UnlockNextSlot()
+        {
+            if (unlockedSlotsCount >= powerSlots.Count)
+                return;
+
+            PowerSlot slot = powerSlots[unlockedSlotsCount];
+
+            slot.Unlock();
+
+            unlockedSlotsCount++;
+
+            OnSlotUnlocked?.Invoke(slot.SlotIndex);
+
+            TryAssignSlotToSegment(slot);
+        }
+
+        private void AssignSegmentToAvailableSlot(BodySegment segment)
+        {
+            if (segment == null)
+                return;
+
+            for (int i = 0; i < powerSlots.Count; i++)
+            {
+                PowerSlot slot = powerSlots[i];
+
+                if (!slot.IsUnlocked)
+                    continue;
+
+                if (slot.AssignedSegment != null)
+                    continue;
+
+                slot.AssignSegment(segment);
+                return;
+            }
+        }
+
+        private void TryAssignSlotToSegment(PowerSlot slot)
+        {
+            if (slot == null)
+                return;
+
+            if (!slot.IsUnlocked)
+                return;
+
+            if (slot.AssignedSegment != null)
+                return;
+
+            for (int i = 0; i < activeSegments.Count; i++)
+            {
+                BodySegment segment = activeSegments[i];
+
+                if (GetSlotBySegment(segment) == null)
+                {
+                    slot.AssignSegment(segment);
+                    return;
+                }
+            }
+        }
+
+        public PowerSlot GetSlot(int slotIndex)
+        {
+            if (slotIndex < 0 || slotIndex >= powerSlots.Count)
+                return null;
+
+            return powerSlots[slotIndex];
+        }
+
+        public PowerSlot GetSlotBySegment(BodySegment segment)
+        {
+            if (segment == null)
+                return null;
+
+            for (int i = 0; i < powerSlots.Count; i++)
+            {
+                if (powerSlots[i].AssignedSegment == segment)
+                    return powerSlots[i];
+            }
+
+            return null;
+        }
+
+        public BodySegment GetSegmentBySlot(int slotIndex)
+        {
+            PowerSlot slot = GetSlot(slotIndex);
+
+            if (slot == null)
+                return null;
+
+            return slot.AssignedSegment;
+        }
+
+        public bool HasAvailableSlot()
+        {
+            for (int i = 0; i < powerSlots.Count; i++)
+            {
+                PowerSlot slot = powerSlots[i];
+
+                if (slot.IsUnlocked && !slot.IsOccupied)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public bool IsSlotUnlocked(int slotIndex)
+        {
+            PowerSlot slot = GetSlot(slotIndex);
+
+            return slot != null && slot.IsUnlocked;
+        }
+
+        public bool IsSlotOccupied(int slotIndex)
+        {
+            PowerSlot slot = GetSlot(slotIndex);
+
+            return slot != null && slot.IsOccupied;
+        }
+
+        public bool SetSlotOccupied(int slotIndex, bool occupied)
+        {
+            PowerSlot slot = GetSlot(slotIndex);
+
+            if (slot == null)
+                return false;
+
+            if (!slot.IsUnlocked)
+                return false;
+
+            slot.SetOccupied(occupied);
+
             return true;
         }
-
-        public void Release()
-        {
-            isOccupied = false;
-        }
-    }
-
-    [Header("Length Milestones")]
-    [SerializeField]
-    private List<LengthMilestone> lengthMilestones = new();
-
-    [Header("Power Slots")]
-    [SerializeField]
-    private List<PowerSlot> powerSlots = new();
-
-    private int currentLength;
-
-    public int CurrentLength => currentLength;
-
-    public int UnlockedSlotCount
-    {
-        get
-        {
-            int count = 0;
-
-            foreach (PowerSlot slot in powerSlots)
-            {
-                if (slot.IsUnlocked)
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-    }
-
-    public int OccupiedSlotCount
-    {
-        get
-        {
-            int count = 0;
-
-            foreach (PowerSlot slot in powerSlots)
-            {
-                if (slot.IsOccupied)
-                {
-                    count++;
-                }
-            }
-
-            return count;
-        }
-    }
-
-    public int AvailableSlotCount =>
-        UnlockedSlotCount - OccupiedSlotCount;
-
-    private void Awake()
-    {
-        UpdateUnlockedSlots();
-    }
-
-    public void UpdateLength(int newLength)
-    {
-        currentLength = Mathf.Max(0, newLength);
-        UpdateUnlockedSlots();
-    }
-
-    private void UpdateUnlockedSlots()
-    {
-        int targetUnlockedSlots = 0;
-
-        foreach (LengthMilestone milestone in lengthMilestones)
-        {
-            if (currentLength >= milestone.requiredLength)
-            {
-                targetUnlockedSlots = Mathf.Max(
-                    targetUnlockedSlots,
-                    milestone.unlockedSlots
-                );
-            }
-        }
-
-        targetUnlockedSlots = Mathf.Clamp(
-            targetUnlockedSlots,
-            0,
-            powerSlots.Count
-        );
-
-        for (int i = 0; i < powerSlots.Count; i++)
-        {
-            if (i < targetUnlockedSlots)
-            {
-                powerSlots[i].Unlock();
-            }
-            else
-            {
-                powerSlots[i].Lock();
-            }
-        }
-    }
-
-    public bool HasAvailableSlot()
-    {
-        return AvailableSlotCount > 0;
-    }
-
-    public int GetAvailableSlotIndex()
-    {
-        for (int i = 0; i < powerSlots.Count; i++)
-        {
-            if (powerSlots[i].IsAvailable)
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    public bool TryOccupySlot(int slotIndex)
-    {
-        if (!IsValidSlotIndex(slotIndex))
-        {
-            return false;
-        }
-
-        return powerSlots[slotIndex].TryOccupy();
-    }
-
-    public void ReleaseSlot(int slotIndex)
-    {
-        if (!IsValidSlotIndex(slotIndex))
-        {
-            return;
-        }
-
-        powerSlots[slotIndex].Release();
-    }
-
-    public bool IsSlotUnlocked(int slotIndex)
-    {
-        if (!IsValidSlotIndex(slotIndex))
-        {
-            return false;
-        }
-
-        return powerSlots[slotIndex].IsUnlocked;
-    }
-
-    public bool IsSlotOccupied(int slotIndex)
-    {
-        if (!IsValidSlotIndex(slotIndex))
-        {
-            return false;
-        }
-
-        return powerSlots[slotIndex].IsOccupied;
-    }
-
-    private bool IsValidSlotIndex(int slotIndex)
-    {
-        return slotIndex >= 0 && slotIndex < powerSlots.Count;
     }
 }

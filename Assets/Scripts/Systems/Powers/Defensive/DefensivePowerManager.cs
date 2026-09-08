@@ -9,15 +9,15 @@ namespace Systems.Powers.Defensive
     {
         [Header("Milestone Settings")]
         [Tooltip("Nhập các mốc độ dài để mở khóa slot (Ví dụ: Phần tử 0 = 10, Phần tử 1 = 25)")]
-        [SerializeField] private List<int> lengthMilestones; 
+        [SerializeField] private List<int> lengthMilestones = new List<int>(); 
         
         [Header("Slot Configuration")]
         [SerializeField] private int maxPerkSlots;
 
         private int currentLength;
         private int unlockedSlotsCount;
-        private List<IDefensivePower> equippedDefensivePowers = new List<IDefensivePower>();
-        private List<BodySegment> activeSegments = new List<BodySegment>();
+        private readonly List<IDefensivePower> equippedDefensivePowers = new List<IDefensivePower>();
+        private readonly List<BodySegment> activeSegments = new List<BodySegment>();
 
         public event Action<int> OnSlotUnlocked;
         public event Action<IDefensivePower> OnPowerEquipped;
@@ -33,9 +33,6 @@ namespace Systems.Powers.Defensive
             unlockedSlotsCount = 0;
             equippedDefensivePowers.Clear();
             activeSegments.Clear();
-            
-            // Đảm bảo list không bị null khi chạy logic
-            if (lengthMilestones == null) lengthMilestones = new List<int>();
         }
 
         public void RegisterNewSegment(BodySegment newSegment)
@@ -44,9 +41,10 @@ namespace Systems.Powers.Defensive
             
             activeSegments.Add(newSegment);
 
-            foreach (var power in equippedDefensivePowers)
+            // Kích hoạt buff của TẤT CẢ kỹ năng đang trang bị lên bộ phận MỚI này
+            for (int i = 0; i < equippedDefensivePowers.Count; i++)
             {
-                power.ApplyDefensiveEffect(newSegment);
+                equippedDefensivePowers[i].ApplyDefensiveEffect(newSegment);
             }
 
             UpdateLength(activeSegments.Count);
@@ -56,9 +54,10 @@ namespace Systems.Powers.Defensive
         {
             if (segment == null || !activeSegments.Contains(segment)) return;
 
-            foreach (var power in equippedDefensivePowers)
+            // Xóa buff của TẤT CẢ kỹ năng khỏi bộ phận bị hủy này
+            for (int i = 0; i < equippedDefensivePowers.Count; i++)
             {
-                power.RemoveDefensiveEffect(segment);
+                equippedDefensivePowers[i].RemoveDefensiveEffect(segment);
             }
 
             activeSegments.Remove(segment);
@@ -75,6 +74,7 @@ namespace Systems.Powers.Defensive
         {
             if (lengthMilestones == null) return;
 
+            // Kiểm tra tăng slot (Tiến)
             for (int i = unlockedSlotsCount; i < lengthMilestones.Count; i++)
             {
                 if (currentLength >= lengthMilestones[i] && unlockedSlotsCount < maxPerkSlots)
@@ -82,21 +82,25 @@ namespace Systems.Powers.Defensive
                     unlockedSlotsCount++;
                     OnSlotUnlocked?.Invoke(unlockedSlotsCount);
                 }
+                else break; // Nếu mốc hiện tại chưa đạt, các mốc sau cũng vậy
             }
+
+            // Sửa lỗi: Nếu chiều dài giảm xuống thấp hơn mốc cũ, bạn có muốn khóa bớt slot lại không?
+            // Nếu có logic khóa slot khi nhân vật ngắn đi, ta sẽ handle thêm ở đây.
         }
 
         public bool EquipPower(IDefensivePower power)
         {
-            if (equippedDefensivePowers.Count >= unlockedSlotsCount) return false;
+            if (power == null || equippedDefensivePowers.Count >= unlockedSlotsCount) return false;
 
             if (!equippedDefensivePowers.Contains(power))
             {
                 equippedDefensivePowers.Add(power);
-                power.ApplyDefensiveEffect();
                 
-                foreach (var segment in activeSegments)
+                // Áp dụng kỹ năng lên TOÀN BỘ các bộ phận đang có (Dùng vòng lặp for tối ưu)
+                for (int i = 0; i < activeSegments.Count; i++)
                 {
-                    power.ApplyDefensiveEffect(segment);
+                    power.ApplyDefensiveEffect(activeSegments[i]);
                 }
 
                 OnPowerEquipped?.Invoke(power);
@@ -107,18 +111,16 @@ namespace Systems.Powers.Defensive
 
         public bool UnequipPower(IDefensivePower power)
         {
-            if (equippedDefensivePowers.Contains(power))
-            {
-                power.RemoveDefensiveEffect();
-                foreach (var segment in activeSegments)
-                {
-                    power.RemoveDefensiveEffect(segment);
-                }
+            if (power == null || !equippedDefensivePowers.Contains(power)) return false;
 
-                equippedDefensivePowers.Remove(power);
-                return true;
+            // Gỡ kỹ năng khỏi TOÀN BỘ các bộ phận
+            for (int i = 0; i < activeSegments.Count; i++)
+            {
+                power.RemoveDefensiveEffect(activeSegments[i]);
             }
-            return false;
+
+            equippedDefensivePowers.Remove(power);
+            return true;
         }
     }
 }

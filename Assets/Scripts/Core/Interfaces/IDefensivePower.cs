@@ -4,5 +4,7 @@ namespace Core.Interfaces
     {
         void ApplyDefensiveEffect(BodySegment segment);
         void RemoveDefensiveEffect(BodySegment segment);
+        void ApplyDefensiveEffect();
+        void RemoveDefensiveEffect();
     }
 }

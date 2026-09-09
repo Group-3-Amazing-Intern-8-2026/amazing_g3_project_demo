@@ -15,5 +15,7 @@ MonoBehaviour:
   foodType: 0
   pointValue: 10
   segmentProgressPercent: 10
+  spawnWeight: 10
+  sprite: {fileID: 0}
   foodColor: {r: 0, g: 1, b: 0, a: 1}
-  foodPrefab: {fileID: 0}
+  size: 0.3

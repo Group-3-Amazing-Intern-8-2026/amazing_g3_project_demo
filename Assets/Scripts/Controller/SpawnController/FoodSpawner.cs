@@ -2,17 +2,11 @@ using UnityEngine;
 
 public class FoodSpawner : ObjectPoolBase<Food>
 {
-    public static FoodSpawner Instance;
+    public static FoodSpawner Instance { get; private set; }
 
     [SerializeField] private int initialFoodCount = 100;
     [SerializeField] private float arenaSize = 30f;
-
-    [Header("Mix Food theo trọng số")]
-    [Tooltip("Gán 3 asset Small/Medium/Big (Create > Item > FoodData)")]
     [SerializeField] private FoodData[] foodDataOptions;
- 
-    [Tooltip("Trọng số tương ứng theo thứ tự trên.")]
-    [SerializeField] private float[] spawnWeights;
 
     protected override void Awake()
     {
@@ -31,43 +25,20 @@ public class FoodSpawner : ObjectPoolBase<Food>
         base.Awake();
     }
 
-    void Start()
+    private void Start()
     {
-        for (int i = 0; i < initialFoodCount; i++)
-        {
-            SpawnFoodAtRandomPosition();
-        }
-    }
-
-    protected override Food CreateItem()
-    {
-        Food food;
-        if (prefab != null)
-        {
-            food = Instantiate(prefab, transform);
-        }
-        else
-        {
-            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-            sphere.transform.SetParent(transform);
-
-            Collider col = sphere.GetComponent<Collider>();
-            if (col != null) col.isTrigger = true;
-            food = sphere.AddComponent<Food>();
-        }
-        return food;
+        SpawnFoodBatch(initialFoodCount);
     }
 
     protected override void OnGetItem(Food food)
     {
         base.OnGetItem(food);
-        Vector2 randomPos = new Vector2(
+
+        food.transform.position = new Vector2(
             Random.Range(-arenaSize, arenaSize),
             Random.Range(-arenaSize, arenaSize)
         );
-        food.transform.position = randomPos;
-         // Gán loại thức ăn (Small/Medium/Big) theo trọng số mỗi lần lấy từ pool.
+
         FoodData chosen = ChooseWeightedFoodData();
         if (chosen != null)
         {
@@ -77,41 +48,33 @@ public class FoodSpawner : ObjectPoolBase<Food>
 
     private FoodData ChooseWeightedFoodData()
     {
-        if (foodDataOptions == null || foodDataOptions.Length == 0)
+        float totalWeight = 0f;
+        foreach (var data in foodDataOptions)
         {
-            Debug.LogWarning("[FoodSpawner] foodDataOptions rỗng — chưa gán Small/Medium/Big trong Inspector.");
-            return null;
+            if (data != null) totalWeight += data.spawnWeight;
         }
- 
-        float total = 0f;
-        foreach (var w in spawnWeights) total += w;
- 
-        if (total <= 0f) return foodDataOptions[0];
- 
-        float roll = Random.Range(0f, total);
+
+        if (totalWeight <= 0f) return foodDataOptions[0];
+
+        float roll = Random.Range(0f, totalWeight);
         float cumulative = 0f;
- 
-        for (int i = 0; i < spawnWeights.Length && i < foodDataOptions.Length; i++)
+
+        foreach (var data in foodDataOptions)
         {
-            cumulative += spawnWeights[i];
-            if (roll <= cumulative) return foodDataOptions[i];
+            if (data == null) continue;
+
+            cumulative += data.spawnWeight;
+            if (roll <= cumulative) return data;
         }
- 
+
         return foodDataOptions[foodDataOptions.Length - 1];
     }
 
-    void SpawnFoodAtRandomPosition()
-    {
-        Get();
-    }
+    public void SpawnFoodBatch(int count) => GetList(count);
 
-    public void RespawnFood(GameObject foodObj)
+    public void RespawnFood(Food food)
     {
-        Food food = foodObj.GetComponent<Food>();
-        if (food != null)
-        {
-            Release(food);
-            Get();
-        }
+        Release(food);
+        Get();
     }
 }

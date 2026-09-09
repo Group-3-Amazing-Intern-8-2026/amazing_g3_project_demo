@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,24 +13,34 @@ public class SnakeBodyManager : MonoBehaviour
     [SerializeField] private int initialBodyCount = 5;
     [SerializeField] private BodySegmentPool bodySegmentPool;
 
-    private List<Transform> bodySegments = new List<Transform>();
+    [Header("Growth Progress & Scaling")]
+    [SerializeField] private float segmentProgress = 0f;
+    [SerializeField] private float minTailScale = 0.2f;
+    [SerializeField] private float maxTailScale = 1.0f;
 
+    public float SegmentProgress => segmentProgress;
     public int SegmentCount => bodySegments.Count;
 
-    void Start()
-    {
+    public event Action<float> OnSegmentProgressUpdated;
 
+    private readonly List<Transform> bodySegments = new List<Transform>();
+
+    private void Start()
+    {
         for (int i = 0; i < initialBodyCount; i++)
         {
             Grow();
         }
+
+        UpdateTailScale();
     }
-    void LateUpdate()
+
+    private void LateUpdate()
     {
         UpdateBodyPositionsAndRotations();
     }
 
-    void UpdateBodyPositionsAndRotations()
+    private void UpdateBodyPositionsAndRotations()
     {
         for (int i = 0; i < bodySegments.Count; i++)
         {
@@ -48,14 +59,42 @@ public class SnakeBodyManager : MonoBehaviour
         }
     }
 
+    public void AddGrowthProgress(float progressPercent)
+    {
+        segmentProgress += progressPercent;
+
+        while (segmentProgress >= 100f)
+        {
+            segmentProgress -= 100f;
+            Grow();
+        }
+
+        UpdateTailScale();
+        OnSegmentProgressUpdated?.Invoke(segmentProgress);
+    }
+
+    private void UpdateTailScale()
+    {
+        if (bodySegments.Count == 0) return;
+        for (int i = 0; i < bodySegments.Count - 1; i++)
+        {
+            bodySegments[i].localScale = Vector3.one * maxTailScale;
+        }
+
+        float t = Mathf.Clamp01(segmentProgress / 100f);
+        float currentScale = Mathf.Lerp(minTailScale, maxTailScale, t);
+        bodySegments[bodySegments.Count - 1].localScale = Vector3.one * currentScale;
+    }
+
     public void Grow()
     {
         BodySegment segment = bodySegmentPool.Get();
-        segment.transform.SetParent(bodyContainer ?? transform);
+        segment.transform.SetParent(bodyContainer != null ? bodyContainer : transform);
 
         float lagDistance = (bodySegments.Count + 1) * spacingBetweenSegments;
         Vector2 spawnPos = snakeMovement.GetPointAtDistance(lagDistance);
         segment.transform.position = new Vector3(spawnPos.x, spawnPos.y, 0f);
+        
         bodySegments.Add(segment.transform);
     }
 
@@ -66,9 +105,12 @@ public class SnakeBodyManager : MonoBehaviour
         int lastIndex = bodySegments.Count - 1;
         BodySegment segment = bodySegments[lastIndex].GetComponent<BodySegment>();
         bodySegments.RemoveAt(lastIndex);
+
         if (segment != null)
         {
             bodySegmentPool.Release(segment);
         }
+
+        UpdateTailScale();
     }
 }

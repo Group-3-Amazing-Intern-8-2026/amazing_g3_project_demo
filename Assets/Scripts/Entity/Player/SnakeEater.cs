@@ -6,14 +6,14 @@ public class SnakeEater : MonoBehaviour
     [SerializeField] private float eatRadius = 0.6f;
     [SerializeField] private LayerMask foodLayer;
 
-    public event Action<Food> OnFoodEaten;
+    public event Action<FoodData> OnFoodConsumed;
 
-    void Update()
+    private void Update()
     {
         CheckFoodOverlap();
     }
 
-    void CheckFoodOverlap()
+    private void CheckFoodOverlap()
     {
         Collider2D[] hitFoods = Physics2D.OverlapCircleAll(transform.position, eatRadius, foodLayer);
 
@@ -22,8 +22,11 @@ public class SnakeEater : MonoBehaviour
             Food food = hitFoods[i].GetComponent<Food>();
             if (food != null)
             {
-                food.OnEaten();
-                OnFoodEaten?.Invoke(food);
+                FoodData data = food.Collect();
+                if (data != null)
+                {
+                    OnFoodConsumed?.Invoke(data);
+                }
             }
         }
     }

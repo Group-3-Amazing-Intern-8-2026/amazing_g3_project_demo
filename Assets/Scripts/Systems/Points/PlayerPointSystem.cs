@@ -3,54 +3,43 @@ using UnityEngine;
 
 public class PlayerPointSystem : MonoBehaviour
 {
-    [Header("Trạng thái hiện tại")]
+    [Header("Current State")]
     [SerializeField] private int totalPoints = 0;
-    [SerializeField] private float segmentProgress = 0f; // 0 - 100
 
     public int TotalPoints => totalPoints;
-    public float SegmentProgress => segmentProgress;
 
     public event Action<int> OnPointsChanged;
 
-    public event Action<float> OnSegmentProgressUpdated;
-
-    public void AddFood(FoodData foodData)
-    {
-        if (foodData == null) return;
-
-        // --- Cộng điểm ---
-        totalPoints += foodData.pointValue;
-        OnPointsChanged?.Invoke(totalPoints);
-
-        // --- Cộng tiến trình, xử lý carry-over khi vượt 100% ---
-        segmentProgress += foodData.segmentProgressPercent;
-
-        while (segmentProgress >= 100f)
-        {
-            segmentProgress -= 100f; // Giữ lại phần dư cho đốt tiếp theo
-            TriggerGrow();
-        }
-
-        OnSegmentProgressUpdated?.Invoke(segmentProgress);
-    }
-
-    private void TriggerGrow()
+    private void Start()
     {
         if (SnakeManager.Instance != null)
         {
-            SnakeManager.Instance.Grow();
-        }
-        else
-        {
-            Debug.LogWarning("[PlayerPointSystem] SnakeManager.Instance là null — không thể Grow().");
+            SnakeManager.Instance.OnFoodEaten += HandleFoodEaten;
         }
     }
-    
-    public void ResetProgress()
+
+    private void OnDestroy()
+    {
+        if (SnakeManager.Instance != null)
+        {
+            SnakeManager.Instance.OnFoodEaten -= HandleFoodEaten;
+        }
+    }
+
+    private void HandleFoodEaten(FoodData foodData)
+    {
+        AddPoints(foodData.pointValue);
+    }
+
+    public void AddPoints(int amount)
+    {
+        totalPoints += amount;
+        OnPointsChanged?.Invoke(totalPoints);
+    }
+
+    public void ResetPoints()
     {
         totalPoints = 0;
-        segmentProgress = 0f;
         OnPointsChanged?.Invoke(totalPoints);
-        OnSegmentProgressUpdated?.Invoke(segmentProgress);
     }
 }

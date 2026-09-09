@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FoodData
   foodType: 1
   pointValue: 30
-  segmentProgressPercent: 30
+  segmentProgressPercent: 20
+  spawnWeight: 10
+  sprite: {fileID: 0}
   foodColor: {r: 1, g: 1, b: 0.2627451, a: 1}
-  foodPrefab: {fileID: 0}
+  size: 0.6

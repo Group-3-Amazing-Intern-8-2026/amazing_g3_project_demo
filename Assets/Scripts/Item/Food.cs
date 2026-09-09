@@ -1,49 +1,40 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(Collider2D), typeof(SpriteRenderer))]
 public class Food : MonoBehaviour
 {
-    [SerializeField] private FoodData foodData;
+    [SerializeField] private SpriteRenderer spriteRenderer;
 
-    public FoodData Data => foodData;
-
-    private SpriteRenderer spriteRenderer;
-    private PlayerPointSystem cachedPointSystem;
+    public FoodData Data { get; private set; }
 
     private void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        ApplyVisual();
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     public void Initialize(FoodData data)
     {
-        foodData = data;
+        Data = data;
         ApplyVisual();
     }
 
     private void ApplyVisual()
     {
-        if (foodData == null || spriteRenderer == null) return;
-        spriteRenderer.color = foodData.foodColor;
+        if (Data == null || spriteRenderer == null) return;
+
+        if (Data.sprite != null)
+        {
+            spriteRenderer.sprite = Data.sprite;
+        }
+
+        spriteRenderer.color = Data.foodColor;
+        transform.localScale = Vector3.one * Data.size;
     }
-
-    public void OnEaten()
+    public FoodData Collect()
     {
-        if (cachedPointSystem == null)
-        {
-            cachedPointSystem = FindFirstObjectByType<PlayerPointSystem>();
-        }
-
-        if (cachedPointSystem != null && foodData != null)
-        {
-            cachedPointSystem.AddFood(foodData);
-        }
-        else if (foodData == null)
-        {
-            Debug.LogWarning("[Food] OnEaten() nhưng foodData null — FoodSpawner chưa Initialize() đúng cách.");
-        }
-
-        FoodSpawner.Instance?.RespawnFood(gameObject);
+        FoodData collectedData = Data;
+        FoodSpawner.Instance?.RespawnFood(this);
+        return collectedData;
     }
 }

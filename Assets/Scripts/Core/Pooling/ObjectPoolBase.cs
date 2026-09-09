@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Pool;
 
@@ -46,6 +47,16 @@ public abstract class ObjectPoolBase<T> : MonoBehaviour where T : Component
     }
 
     public T Get() => pool.Get();
+
+    public List<T> GetList(int count)
+    {
+        List<T> items = new List<T>(count);
+        for (int i = 0; i < count; i++)
+        {
+            items.Add(pool.Get());
+        }
+        return items;
+    }
 
     public void Release(T item) => pool.Release(item);
 }
